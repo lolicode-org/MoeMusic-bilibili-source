@@ -66,8 +66,12 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v8
         with:
+          # upload-artifact v7 doesn't support renaming uploaded files when not archived. As the name is not fixed, downloading all jars and removing sources for workaround
           name: All jars
           path: build/libs
+
+      - name: Remove sources jar
+        run: rm build/libs/*-sources.jar
 
       - name: Publish release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228
@@ -75,6 +79,5 @@ jobs:
           tag_name: ${{ github.event.inputs.tag_name }}
           files: |
             build/libs/*.jar
-            !build/libs/*-sources.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
