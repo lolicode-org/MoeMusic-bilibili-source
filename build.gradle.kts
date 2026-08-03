@@ -49,8 +49,8 @@ idea {
     }
 }
 
+val archiveProjectName = project.name
 tasks.jar {
-    inputs.property("projectName", project.name)
-    from("LICENSE") { rename { "${it}_${project.name}" } }
+    inputs.property("projectName", archiveProjectName)
+    from("LICENSE") { rename { "${it}_$archiveProjectName" } }
 }
-

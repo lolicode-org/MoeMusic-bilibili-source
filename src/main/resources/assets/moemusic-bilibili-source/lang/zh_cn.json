@@ -1,6 +1,9 @@
 {
   "plugin.moemusic.bilibili": "哔哩哔哩音源",
   "source.moemusic.bilibili": "哔哩哔哩",
+  "config.moemusic.bilibili.source.autoplay_favorite_collection_id": "自动播放收藏夹 ID",
+  "config.moemusic.bilibili.source.autoplay_favorite_collection_id.tooltip": "公开哔哩哔哩收藏夹的 media_id/fid，每个视频使用第一个分P。设为 0 时禁用。",
+  "config.moemusic.bilibili.source.validation.favorite_collection_id": "收藏夹 ID 必须为 0 或正数。",
   "error.moemusic.bilibili.invalid_identifier": "这不是有效的哔哩哔哩视频或分P标识。",
   "error.moemusic.bilibili.track_not_found": "找不到这个哔哩哔哩视频分P。",
   "error.moemusic.bilibili.paid_video": "不支持付费、需要账号或其他受限的哔哩哔哩视频。",

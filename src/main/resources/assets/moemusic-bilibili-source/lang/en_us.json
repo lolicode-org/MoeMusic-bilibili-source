@@ -1,6 +1,9 @@
 {
   "plugin.moemusic.bilibili": "MoeMusic Bilibili Source",
   "source.moemusic.bilibili": "Bilibili",
+  "config.moemusic.bilibili.source.autoplay_favorite_collection_id": "Autoplay Favorite Collection ID",
+  "config.moemusic.bilibili.source.autoplay_favorite_collection_id.tooltip": "Public Bilibili favorite collection media_id/fid. Each video contributes its first part. Set to 0 to disable.",
+  "config.moemusic.bilibili.source.validation.favorite_collection_id": "Favorite collection ID must be 0 or a positive number.",
   "error.moemusic.bilibili.invalid_identifier": "That is not a valid Bilibili video or part identifier.",
   "error.moemusic.bilibili.track_not_found": "The Bilibili video part was not found.",
   "error.moemusic.bilibili.paid_video": "Paid, account-only, or otherwise restricted Bilibili videos are not supported.",

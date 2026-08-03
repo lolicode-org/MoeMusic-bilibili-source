@@ -49,6 +49,8 @@ import java.util.Locale
 private const val API_BASE = "https://api.bilibili.com"
 private const val BILIBILI_WEB_BASE = "https://www.bilibili.com"
 private const val SEARCH_PAGE_SIZE = 20
+private const val FAVORITE_PAGE_SIZE = 20
+private const val MAX_FAVORITE_PAGES = 50
 private const val MAX_RESPONSE_BYTES = 8 * 1024 * 1024
 private const val TRACK_SEPARATOR = ":"
 private const val SELECTION_PREFIX = "video:"
@@ -61,6 +63,11 @@ private val AV_ID_PATTERN = Regex("av([1-9][0-9]*)", RegexOption.IGNORE_CASE)
 private val AV_PATH_PATTERN = Regex("(?:^|/)av([1-9][0-9]*)(?:/|$)", RegexOption.IGNORE_CASE)
 private val HTML_TAG_PATTERN = Regex("<[^>]*>")
 private val HTML_ENTITY_PATTERN = Regex("&(#x[0-9a-fA-F]+|#[0-9]+|amp|quot|apos|lt|gt|nbsp);")
+private val HTTP_URL_PATTERN = Regex(
+    """https?://[A-Za-z0-9._~:/?#\[\]@!$&'()*+,;=%-]+""",
+    RegexOption.IGNORE_CASE,
+)
+private val URL_TRAILING_PUNCTUATION = charArrayOf('.', ',', ';', ':', '!', '?', ')', ']', '}', '\'', '"')
 
 internal data class BilibiliTrackKey(val bvid: String, val cid: Long)
 
@@ -123,6 +130,14 @@ internal fun parseBilibiliIdentifier(raw: String): BilibiliVideoReference? {
     }
     parseTrackId(value)?.let { return BilibiliVideoReference(bvid = it.bvid, cid = it.cid) }
 
+    parseBilibiliUrl(value)?.let { return it }
+    return HTTP_URL_PATTERN.findAll(value)
+        .map { it.value.trimEnd(*URL_TRAILING_PUNCTUATION) }
+        .mapNotNull(::parseBilibiliUrl)
+        .firstOrNull()
+}
+
+private fun parseBilibiliUrl(value: String): BilibiliVideoReference? {
     val uri = runCatching { URI(value) }.getOrNull() ?: return null
     if (uri.scheme?.lowercase(Locale.ROOT) !in setOf("http", "https")) return null
     val host = uri.host?.lowercase(Locale.ROOT) ?: return null
@@ -188,11 +203,19 @@ private class BilibiliBadResponseException(cause: Throwable) : RuntimeException(
 
 /** Anonymous Bilibili source. It intentionally has no cookie, login, paid-video, or DRM path. */
 class BilibiliSource(
+    initialConfig: BilibiliConfig = BilibiliConfig(),
     private val http: HttpClient = defaultHttpClient(),
 ) : SearchableMusicSource, IdentifierResolvableMusicSource {
 
+    @Volatile
+    private var config: BilibiliConfig = initialConfig
+
     override val id: String = BilibiliPlugin.SOURCE_ID
     override val displayName: LocalizedText = LocalizedText.key("source.moemusic.bilibili")
+
+    fun updateConfig(config: BilibiliConfig) {
+        this.config = config
+    }
 
     override suspend fun search(query: SearchQuery, submitter: MoeMusicUser?): UserResult<SearchResult> {
         val text = query.query.trim().take(200)
@@ -297,6 +320,27 @@ class BilibiliSource(
         }
     }
 
+    override suspend fun getAutoplayTracks(): List<TrackInfo> {
+        val collectionId = config.autoplayFavoriteCollectionId.takeIf { it > 0 } ?: return emptyList()
+        val tracks = linkedMapOf<String, TrackInfo>()
+        var page = 1
+        do {
+            val data = requestApi(
+                "/x/v3/fav/resource/list",
+                mapOf(
+                    "media_id" to collectionId.toString(),
+                    "pn" to page.toString(),
+                    "ps" to FAVORITE_PAGE_SIZE.toString(),
+                    "platform" to "web",
+                ),
+                BILIBILI_WEB_BASE,
+            )
+            autoplayTracksFromFavoritePage(data).forEach { tracks.putIfAbsent(it.id, it) }
+            page += 1
+        } while (data.flag("has_more") && page <= MAX_FAVORITE_PAGES)
+        return tracks.values.toList()
+    }
+
     override suspend fun resolve(track: TrackInfo, submitter: MoeMusicUser?): PlaybackResolution {
         val key = parseTrackId(track.id) ?: throw SourceFormatException()
         val video = try {
@@ -395,6 +439,27 @@ class BilibiliSource(
         coverUrl = video.coverUrl
         unavailableReason = if (video.paid) paidMessage() else null
     }
+
+    internal fun autoplayTracksFromFavoritePage(data: JsonObject): List<TrackInfo> =
+        (data["medias"] as? JsonArray).orEmpty().mapNotNull { element ->
+            val item = element as? JsonObject ?: return@mapNotNull null
+            if (item.int("type") != 2 || (item.int("attr") ?: 0) != 0) return@mapNotNull null
+            val bvid = item.string("bvid", "bv_id")?.takeIf(BVID_PATTERN::matches) ?: return@mapNotNull null
+            val cid = (item["ugc"] as? JsonObject)?.long("first_cid")?.takeIf { it > 0 }
+                ?: return@mapNotNull null
+            val upper = item["upper"] as? JsonObject
+            val ownerName = cleanBilibiliText(upper?.string("name").orEmpty()).ifBlank { "Bilibili" }
+            val pageCount = item.int("page")?.takeIf { it > 0 } ?: 1
+            TrackInfo(
+                id = canonicalTrackId(bvid, cid),
+                title = cleanBilibiliText(item.string("title").orEmpty()).ifBlank { bvid },
+                artists = listOf(ArtistInfo(upper?.long("mid")?.toString() ?: ownerName, ownerName)),
+                durationMs = if (pageCount == 1) durationMillis(item.long("duration")) else -1L,
+            ) {
+                sourceId = this@BilibiliSource.id
+                coverUrl = normalizeCoverUrl(item.string("cover"))
+            }
+        }
 
     private fun pageTitle(video: BilibiliVideo, page: BilibiliPage): String {
         val part = cleanBilibiliText(page.part).trim()
@@ -628,9 +693,11 @@ class BilibiliSource(
 
     private fun BilibiliVideo.page(cid: Long): BilibiliPage? = pages.firstOrNull { it.cid == cid }
     private fun BilibiliVideo.pageNumber(number: Int): BilibiliPage? = pages.firstOrNull { it.page == number }
-    private fun BilibiliPage.durationMillis(): Long = runCatching {
-        Math.multiplyExact(durationSeconds, 1000L)
-    }.getOrDefault(-1L)
+    private fun BilibiliPage.durationMillis(): Long = durationMillis(durationSeconds)
+    private fun durationMillis(seconds: Long?): Long {
+        val validSeconds = seconds?.takeIf { it >= 0 } ?: return -1L
+        return runCatching { Math.multiplyExact(validSeconds, 1000L) }.getOrDefault(-1L)
+    }
 
     private fun JsonObject.string(vararg keys: String): String? = keys.firstNotNullOfOrNull { key ->
         this[key]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }

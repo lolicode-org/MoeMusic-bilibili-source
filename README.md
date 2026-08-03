@@ -4,7 +4,13 @@
 
 ### 功能
 
-支持：搜索，链接解析，播放公开视频的音频
+支持：搜索，链接解析，播放公开视频的音频，从公开收藏夹加载自动播放曲目
+
+自动播放收藏夹可在 `config/moemusic/plugin-configs/moemusic-bilibili-source.toml` 中配置：
+
+```toml
+autoplay_favorite_collection_id = 0 # 收藏夹 URL 中的 fid/media_id；0 表示禁用
+```
 
 **不支持**：登录，解析付费视频（及其他任意需要绕过版权保护措施的功能），直播，[音频区](https://www.bilibili.com/audio/home)
 
@@ -22,7 +28,13 @@ A Bilibili plugin for [MoeMusic](https://github.com/lolicode-org/MoeMusic), used
 
 ### Features
 
-Supported: Search, link parsing, playing audio from public videos.
+Supported: Search, link parsing, playing audio from public videos, and loading autoplay tracks from a public favorite collection.
+
+Configure autoplay in `config/moemusic/plugin-configs/moemusic-bilibili-source.toml`:
+
+```toml
+autoplay_favorite_collection_id = 0 # fid/media_id from the collection URL; 0 disables it
+```
 
 **Not supported**: Login, parsing paid videos (and any other features requiring bypassing copyright protection measures), live streams, [Audio Section](https://www.bilibili.com/audio/home).
 

@@ -25,6 +25,13 @@ class BilibiliSourceTest {
             BilibiliVideoReference(aid = 12345),
             parseBilibiliIdentifier("bilibili:av12345"),
         )
+        assertEquals(
+            BilibiliVideoReference("BV18D3x6WEb2"),
+            parseBilibiliIdentifier(
+                "分享视频：TV动画「バンドリ！ ゆめ∞みた（BanG Dream! YUME∞MITA）」#7 插入曲「TearJerker」 " +
+                    "https://www.bilibili.com/video/BV18D3x6WEb2/",
+            ),
+        )
     }
 
     @Test
@@ -42,5 +49,23 @@ class BilibiliSourceTest {
         )
 
         assertEquals(-8.9, result?.integratedLufs)
+    }
+
+    @Test
+    fun `favorite page contributes public videos using first cid`() {
+        val tracks = BilibiliSource().autoplayTracksFromFavoritePage(
+            Json.parseToJsonElement(
+                """{"medias":[
+                    {"type":2,"attr":0,"bvid":"BV18D3x6WEb2","title":"TearJerker","page":1,"duration":144,"cover":"https://i0.hdslb.com/a.jpg","upper":{"mid":1,"name":"Artist"},"ugc":{"first_cid":40429357668}},
+                    {"type":2,"attr":0,"bvid":"BV1pm411f7JY","title":"Multi-part","page":2,"duration":999,"ugc":{"first_cid":2}},
+                    {"type":12,"attr":0,"bvid":"BV18D3x6WEb2","ugc":{"first_cid":1}},
+                    {"type":2,"attr":9,"bvid":"BV1xF3467Etw","ugc":{"first_cid":3}}
+                ]}""",
+            ).jsonObject,
+        )
+
+        assertEquals(2, tracks.size)
+        assertEquals(144000L, tracks.first { it.id == "BV18D3x6WEb2:40429357668" }.durationMs)
+        assertEquals(-1L, tracks.first { it.id == "BV1pm411f7JY:2" }.durationMs)
     }
 }
