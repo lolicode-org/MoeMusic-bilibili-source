@@ -1,0 +1,80 @@
+# Automatically build the project and run any configured tests for every push
+# and submitted pull request. This can help catch issues that only occur on
+# certain platforms or Java versions, and provides a first line of defence
+# against bad commits.
+
+name: build
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag name"
+        required: false
+  push:
+    branches: [master, main]
+    paths-ignore:
+      - '.github/workflows/**'
+      - '**/*.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: build
+        run: ./gradlew build
+      - name: Upload all jars
+        uses: actions/upload-artifact@v7
+        with:
+          name: All jars
+          path: build/libs/*.jar
+      - name: Upload jar
+        uses: actions/upload-artifact@v7
+        with:
+          archive: 'false'
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+      - name: Upload sources jar
+        uses: actions/upload-artifact@v7
+        with:
+          archive: 'false'
+          path: build/libs/*-sources.jar
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event.inputs.tag_name != ''
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: All jars
+          path: build/libs
+
+      - name: Publish release
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228
+        with:
+          tag_name: ${{ github.event.inputs.tag_name }}
+          files: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
