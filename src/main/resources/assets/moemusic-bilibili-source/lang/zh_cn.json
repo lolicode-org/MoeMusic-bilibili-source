@@ -1,0 +1,11 @@
+{
+  "plugin.moemusic.bilibili": "哔哩哔哩音源",
+  "source.moemusic.bilibili": "哔哩哔哩",
+  "error.moemusic.bilibili.invalid_identifier": "这不是有效的哔哩哔哩视频或分P标识。",
+  "error.moemusic.bilibili.track_not_found": "找不到这个哔哩哔哩视频分P。",
+  "error.moemusic.bilibili.paid_video": "不支持付费、需要账号或其他受限的哔哩哔哩视频。",
+  "error.moemusic.bilibili.no_stream": "这个哔哩哔哩视频没有可用的免费 DASH 音频流。",
+  "error.moemusic.bilibili.bad_response": "哔哩哔哩返回了无效响应。",
+  "error.moemusic.bilibili.search_failed": "哔哩哔哩搜索失败。",
+  "error.moemusic.bilibili.request_failed": "哔哩哔哩请求失败（代码 %1$s）。"
+}

@@ -1,0 +1,11 @@
+{
+  "plugin.moemusic.bilibili": "MoeMusic Bilibili Source",
+  "source.moemusic.bilibili": "Bilibili",
+  "error.moemusic.bilibili.invalid_identifier": "That is not a valid Bilibili video or part identifier.",
+  "error.moemusic.bilibili.track_not_found": "The Bilibili video part was not found.",
+  "error.moemusic.bilibili.paid_video": "Paid, account-only, or otherwise restricted Bilibili videos are not supported.",
+  "error.moemusic.bilibili.no_stream": "No free DASH audio stream is available for this Bilibili video.",
+  "error.moemusic.bilibili.bad_response": "Bilibili returned an invalid response.",
+  "error.moemusic.bilibili.search_failed": "Bilibili search failed.",
+  "error.moemusic.bilibili.request_failed": "Bilibili request failed (code %1$s)."
+}
