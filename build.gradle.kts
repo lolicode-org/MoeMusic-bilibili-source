@@ -21,13 +21,9 @@ repositories {
 
 dependencies {
     compileOnly("org.lolicode.moemusic:api:${providers.gradleProperty("plugin_api_version").get()}")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:${providers.gradleProperty("kotlinx_serialization_version").get()}")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:${providers.gradleProperty("kotlinx_serialization_version").get()}")
-    compileOnly("org.slf4j:slf4j-api:${providers.gradleProperty("slf4j_version").get()}")
 
     testImplementation(kotlin("test"))
     testImplementation("org.lolicode.moemusic:api:${providers.gradleProperty("plugin_api_version").get()}")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${providers.gradleProperty("kotlinx_serialization_version").get()}")
 }
 
 tasks.withType<JavaCompile>().configureEach { options.release = 17 }
