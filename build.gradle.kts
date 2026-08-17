@@ -11,13 +11,41 @@ version = providers.gradleProperty("version").get()
 group = providers.gradleProperty("maven_group").get()
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
-        name = "MoeMusic on Codeberg"
-        url = uri("https://codeberg.org/api/packages/lolicode/maven")
-        content { includeGroupByRegex("org\\.lolicode.*") }
+        name = "Lolicode Releases"
+        url = uri("https://maven.lolicode.org/releases")
+        content {
+            includeGroupByRegex("org\\.lolicode.*")
+        }
     }
-    mavenLocal()
+    maven {
+        name = "Lolicode Snapshots"
+        url = uri("https://maven.lolicode.org/snapshots")
+        content {
+            includeGroupByRegex("org\\.lolicode.*")
+        }
+    }
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/lolicode-org/MoeMusic")
+        credentials {
+            username = providers.gradleProperty("gpr.user")
+                .orElse(providers.environmentVariable("GITHUB_ACTOR"))
+                .orElse("")
+                .get()
+            password = providers.gradleProperty("gpr.key")
+                .orElse(providers.environmentVariable("GITHUB_PACKAGES_TOKEN"))
+                .orElse(providers.environmentVariable("PACKAGES_READ_TOKEN"))
+                .orElse(providers.environmentVariable("GITHUB_TOKEN"))
+                .orElse("")
+                .get()
+        }
+        content {
+            includeGroupByRegex("org\\.lolicode.*")
+        }
+    }
 }
 
 dependencies {
