@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     id("org.jetbrains.kotlin.jvm") version "2.4.10"
@@ -29,7 +30,11 @@ dependencies {
 tasks.withType<JavaCompile>().configureEach { options.release = 17 }
 
 kotlin {
-    compilerOptions { jvmTarget = JvmTarget.JVM_17 }
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+        apiVersion = KotlinVersion.KOTLIN_2_2
+        languageVersion = KotlinVersion.KOTLIN_2_2
+    }
 }
 
 java {
