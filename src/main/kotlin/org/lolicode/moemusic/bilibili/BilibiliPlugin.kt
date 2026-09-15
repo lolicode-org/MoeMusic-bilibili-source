@@ -10,12 +10,19 @@ import org.lolicode.moemusic.api.plugin.pluginConfigSpec
 object BilibiliPlugin : Plugin {
     const val PLUGIN_ID = "moemusic-bilibili-source"
     const val CONFIG_ID = "moemusic-bilibili-source"
+
+    /**
+     * Minecraft Mod ID for Fabric, Forge, and NeoForge loaders.
+     * Must be lowercase alphanumeric with underscores (`^[a-z][a-z0-9_]{1,63}$`).
+     */
+    const val MOD_ID = "moemusic_bilibili_source"
+
     const val SOURCE_ID = "bilibili"
 
     override val id: String = PLUGIN_ID
     override val configId: String = CONFIG_ID
     override val displayName: LocalizedText = LocalizedText.key("plugin.moemusic.bilibili")
-    override val version: String = "1.1.0"
+    override val version: String = "1.2.0"
     override val supportedApiVersions: String = ">=2.2.0 <3.0.0"
 
     override val configSpec: PluginConfigSpec<BilibiliConfig> = pluginConfigSpec(::BilibiliConfig) {
