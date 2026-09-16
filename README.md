@@ -19,7 +19,7 @@ autoplay_favorite_collection_id = 0 # 收藏夹 URL 中的 fid/media_id；0 表�
 
 ### 安装
 
-下载 [Release](https://github.com/lolicode-org/MoeMusic-bilibili-source/releases/) 中**不带** `-sources` 后缀的 jar，放入`config/moemusic/plugins/`
+下载 [Release](https://github.com/lolicode-org/MoeMusic-bilibili-source/releases/) 中**不带** `-sources` 后缀的 jar，放入`mods`（仅适用于 Minecraft Mod 端）或`config/moemusic/plugins/`
 
 ### 许可证
 
@@ -46,7 +46,7 @@ autoplay_favorite_collection_id = 0 # fid/media_id from the collection URL; 0 di
 
 ### Installation
 
-Download the jar **without** the `-sources` suffix from [Releases](https://github.com/lolicode-org/MoeMusic-bilibili-source/releases/), and place it into `config/moemusic/plugins/`.
+Download the jar **without** the `-sources` suffix from [Releases](https://github.com/lolicode-org/MoeMusic-bilibili-source/releases/), and place it into `mods` (for modded Minecraft only) or `config/moemusic/plugins/`.
 
 ### License
 
