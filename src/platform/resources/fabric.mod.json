@@ -7,7 +7,11 @@
   "authors": [
     "${mod_author}"
   ],
-  "contact": {},
+  "contact": {
+    "homepage": "${mod_repo}",
+    "sources": "${mod_repo}",
+    "issues": "${mod_repo}/issues"
+  },
   "license": "${mod_license}",
   "environment": "*",
   "entrypoints": {

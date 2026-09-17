@@ -126,6 +126,7 @@ tasks.named<ProcessResources>("processPlatformResources") {
         "mod_description" to providers.gradleProperty("mod_description").get(),
         "mod_author" to providers.gradleProperty("mod_author").get(),
         "mod_license" to providers.gradleProperty("mod_license").get(),
+        "mod_repo" to providers.gradleProperty("mod_repo").get(),
         "fabric_entrypoint" to providers.gradleProperty("fabric_entrypoint").get(),
         "moemusic_version" to providers.gradleProperty("moemusic_version").get(),
     )
